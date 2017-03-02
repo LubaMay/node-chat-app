@@ -2,16 +2,10 @@
 
     socket.on('connect', function () {
         console.log('Connected to server');
-
-
-        socket.emit('createMessage', {
-            from: 'Chat userOne',
-            text: 'Hello there! I am here :)'
-        });
     });
 
 
-
+    // Listen Events
     socket.on('disconnect', function () {
         console.log('Disconnected from server');
     });
