@@ -38,19 +38,26 @@
 
             io.to(params.room).emit('updateUserList', users.getUserList(params.room));
             socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
-            socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined`));
+            socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined.`));
             callback();
         });
 
-        socket.on('createMessage', (message, callback) => {
-            console.log('createMessage', message);
-            // io.emit emits an event to every single connection
-            io.emit('newMessage', generateMessage(message.from, message.text));
+        socket.on('createMessage', ( message, callback) => {
+            let user = users.getUser(socket.id);
+
+            if(user && isRealString(message.text)) {
+                // io.emit emits an event to every single connection
+                io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+            }
             callback();
         });
 
         socket.on('createLocationMessage', (coords) => {
-            io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+            let user = users.getUser(socket.id);
+
+            if(user) {
+                io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+            }
         });
 
         socket.on('disconnect', () => {
@@ -58,7 +65,7 @@
 
             if(user) {
                 io.to(user.room).emit('updateUserList', users.getUserList(user.room));
-                io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left`));
+                io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left.`));
             }
         });
     });
